@@ -1,9 +1,15 @@
-export interface ChatMessage {
+export interface IChatMessage {
     author: string;
     message: string;
 }
 
-export interface ChatState {
+export interface IChatState {
     input: string;
-    messages: ChatMessage[];
+    messages: IChatMessage[];
 }
+
+export  interface IChatRoom {
+    nickName: string;
+    roomId: string;
+}
+

@@ -1,7 +1,6 @@
 import React from "react";
 
 import "./ChatRoom.css";
-import useChat from "../../useChat";
 
 const ChatRoom = (props: { match: { params: { roomId: any; }; }; }) => {
     const { roomId } = props.match.params;

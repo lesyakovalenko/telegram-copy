@@ -1,34 +1,17 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
     Grid,
-    TextField,
     Button,
 } from '@material-ui/core';
 import {Formik, Form, FormikProps} from 'formik';
 import * as Yup from 'yup'
-import {IFormStatus, IFormStatusProps} from "../interfaces/status.interface";
+import {IFormStatus, IRegister} from "./types";
 import {useStyles} from "./createStyles"
-import {IRegister} from "../interfaces/register.interface";
-import axios from "axios";
-import {IUser} from "../interfaces/user.interface";
+import {IUser} from "../../interfaces/user.interface";
 import {inputForm} from "./inputForm";
-import {Redirect, useHistory} from "react-router-dom";
-
-const API_SERVER = 'http://localhost:5000/auth/register'
-const formStatusProps: IFormStatusProps = {
-    success: {
-        message: 'Signed up successfully.',
-        type: 'success',
-    },
-    duplicate: {
-        message: 'Email-id already exist. Please use different email-id.',
-        type: 'error',
-    },
-    error: {
-        message: 'Something went wrong. Please try again.',
-        type: 'error',
-    },
-}
+import {useHistory} from "react-router-dom";
+import * as authActions from '../../actions/auth';
+import {formStatusProps} from "./status.error";
 
 export const Register: React.FunctionComponent = () => {
     const classes = useStyles()
@@ -44,30 +27,39 @@ export const Register: React.FunctionComponent = () => {
         nickName: ''
     })
     const history = useHistory();
-    useEffect(()=>{
-        console.log('useEffect',person)
-        if(person?._id && person?.email){
-            history.push('/login')
-        }
-
-    }, [person])
+    // useEffect(()=>{
+    //     console.log('useEffect',person)
+    //     if(person?._id && person?.email){
+    //         history.push('/login')
+    //     }
+    //
+    // }, [])
 
 
     const createNewUser = async (data: IRegister, resetForm: Function) => {
         if (data) {
-            axios.post(API_SERVER, data)
-                .then(res => {
-                    setPerson(res.data._doc);
-                    console.log('register', res)
-
-
-                     //setDisplayFormStatus(true)
-                }).catch((e) => {
-                console.log(e)
+            try {
+                const newUser = await authActions.register(data);
                 setDisplayFormStatus(true)
+                history.push('/login')
+            } catch (e) {
+                setFormStatus(formStatusProps.error)
+                setDisplayFormStatus(true)
+            }
 
-            })
-            console.log(data)
+            // axios.post(API_SERVER, data)
+            //     .then(res => {
+            //         setPerson(res.data._doc);
+            //         console.log('register', res)
+            //
+            //
+            //          //setDisplayFormStatus(true)
+            //     }).catch((e) => {
+            //     console.log(e)
+            //     setDisplayFormStatus(true)
+            //
+            // })
+            // console.log(data)
             //resetForm({})
         }
     }
@@ -84,7 +76,7 @@ export const Register: React.FunctionComponent = () => {
                 }}
                 onSubmit={(values: IRegister, actions) => {
                     createNewUser(values, actions.resetForm);
-                    setTimeout(()=> {
+                    setTimeout(() => {
                         console.log(person)
                         history.push('/login')
                     }, 0)

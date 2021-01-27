@@ -1,11 +1,11 @@
 import React from 'react';
-import { ChatMessage, ChatState } from './types';
+import { IChatMessage, IChatState } from './types';
 import { ChatContext } from './ChatContext';
 
 export class Chat extends React.Component {
     static contextType = ChatContext;
 
-    state: ChatState = {
+    state: IChatState = {
         messages: [
             {
                 message: 'Welcome!',
@@ -22,7 +22,7 @@ export class Chat extends React.Component {
 
         const observable = this.context.onMessage();
 
-        observable.subscribe((m: ChatMessage) => {
+        observable.subscribe((m: IChatMessage) => {
             let messages = this.state.messages;
 
 
@@ -58,7 +58,7 @@ export class Chat extends React.Component {
         return (
             <div className="Chat">
                 <div className="App-chatbox">
-                    {this.state.messages.map((msg: ChatMessage) => {
+                    {this.state.messages.map((msg: IChatMessage) => {
                         msgIndex++;
                         return (
                             <div key={msgIndex}>

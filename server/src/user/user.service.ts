@@ -4,6 +4,7 @@ import {CreateUserDto} from "./dto/create.user.dto";
 import {InjectModel} from "@nestjs/mongoose";
 import {Model} from "mongoose";
 import {User} from "./interfaces/user.interface";
+import normalize from "normalize-package-data";
 
 @Injectable()
 export class UserService {
@@ -27,8 +28,20 @@ export class UserService {
         return createUser;
     }
 
-    async findUserByEmail(email){
-        return await this.userModel.findOne({email})
+    async findUserByEmail(email) {
+        let user = await this.userModel.findOne({email});
+        return user;
+    }
+
+    async findUsersList(condition?) {
+        let usersList = condition ? await this.userModel.find(condition) : await this.userModel.find();
+        return usersList;
+    }
+
+    async updateAvatar(avatar, userId) {
+        const user = await this.userModel.findOne({_id: userId})
+        user.avatar = normalize(avatar.path)
+        return await user.save()
     }
 
 }

@@ -1,29 +1,39 @@
 import io from 'socket.io-client';
-import { ChatMessage } from './types';
-import { fromEvent, Observable } from 'rxjs';
+import {IChatMessage, IChatRoom} from './types';
+import {fromEvent, Observable} from 'rxjs';
 
 export class SocketService {
     private socket: SocketIOClient.Socket = {} as SocketIOClient.Socket;
 
-    public init (): SocketService {
+    public init(): SocketService {
         console.log('initiating socket service');
-        this.socket = io('localhost:5000');
+        let token = localStorage.getItem('token');
+        this.socket = io('localhost:5000')
         return this;
     }
 
     // send a message for the server to broadcast
-    public send (message: ChatMessage): void {
+    public send(message: IChatMessage): void {
         console.log('emitting message: ' + message);
-        this.socket.emit('message', message);
+        this.socket.emit('add-message', message);
     }
 
+    public leaveChatRoom(chatRoom: IChatRoom) {
+        this.socket.emit('leave-chat-room', chatRoom);
+    }
+
+    public enterChatRoom(chatRoom: IChatRoom) {
+        this.socket.emit('enter-chat-room', chatRoom)
+    }
+
+
     // link message event to rxjs data source
-    public onMessage (): Observable<ChatMessage> {
+    public onMessage(): Observable<IChatMessage> {
         return fromEvent(this.socket, 'message');
     }
 
     // disconnect - used when unmounting
-    public disconnect (): void {
+    public disconnect(): void {
         this.socket.disconnect();
     }
 }

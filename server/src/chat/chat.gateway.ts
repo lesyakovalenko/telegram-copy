@@ -11,6 +11,8 @@ import {User} from "../user/interfaces/user.interface";
 import {ChatRoom} from "./interfaces/chatRoom.interfaces";
 import {Message} from "./interfaces/message.interface";
 import {Socket} from "socket.io";
+import {UseGuards} from "@nestjs/common";
+import JwtAuthGuard from "../auth/JwtAuthGuard";
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -37,7 +39,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
 
-
     @SubscribeMessage('chat')
     async onChat(client, message) {
         console.log(message);
@@ -58,12 +59,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log(client)
         console.log(data)
         let user = await this.userModel.findOne({nickname: data.nickname});
-        if (!user) {
-            user = await this.userModel.create({nickname: data.nickname, clientId: client.id});
-        } else {
-            user.clientId = client.id;
-            user = await this.userModel.findByIdAndUpdate(user._id, user, {new: true});
-        }
+
         client.join(data.roomId).broadcast.to(data.roomId)
             .emit('users-changed', {user: user.nickName, event: 'joined'});
     }

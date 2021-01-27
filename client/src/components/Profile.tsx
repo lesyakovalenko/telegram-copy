@@ -1,32 +1,22 @@
 import React, {useEffect, useState} from 'react';
-import axios from "axios";
+import * as userActions from '../actions/user'
 
-const API_SERVER = 'http://localhost:5000/user'
-
-export const Profile = (props: { location: { state: any; }; }) => {
-    let infoUser = props.location.state;
-    const [person, setPerson] = useState(  infoUser || {
+export const Profile = () => {
+    const [person, setPerson] = useState( {
         _id: '',
         nickName: '',
         email: '',
     })
-    // if (!(person?.email && person?.nickName)) {
-    //     const token = localStorage.getItem('token');
-    //     console.log(token)
-    //     axios.get(API_SERVER, {
-    //         headers: {
-    //             'Authorization': `Bearer ${token}`
-    //         }
-    //     }).then((res) => {
-    //         console.log('getdata', res.data)
-    //         setPerson(res.data)
-    //     }).catch((e)=>{
-    //         console.log(e)
-    //     })
-    // }
-    useEffect(()=> {
-           console.log('useEffect', person)
-    },[person])
+
+    const load = async () => {
+        const user = await userActions.getUser()
+        setPerson(user)
+    }
+
+    useEffect(() => {
+        console.log('useEffect', person)
+        load()
+    }, [])
 
     return (
         <div>
