@@ -1,7 +1,7 @@
 # compiled output
 /telegram-copy/server/dist
 /node_modules/
-
+/node_modules/**/*.yml
 # Logs
 logs
 *.log
@@ -33,4 +33,7 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 /telegram-copy/server/node_modules/
+/telegram-copy/client/node_modules/
 /telegram-copy/.idea/
+/client/node_modules/
+/client/src/.sass-cache/

@@ -10,7 +10,7 @@ export class UserController {
 
     }
     @UseGuards(JwtAuthGuard)
-    @Get('get')
+    @Get()
     getUserInfo(@Req() req){
         console.log(req)
         return this.userService.findUserByEmail(req.user.email)

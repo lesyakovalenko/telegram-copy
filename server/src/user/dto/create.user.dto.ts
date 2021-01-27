@@ -9,7 +9,7 @@ export class CreateUserDto {
     @ApiProperty()
     @IsString()
     @IsNotEmpty()
-    readonly name: string;
+    readonly nickName: string;
 
 
     @IsString()

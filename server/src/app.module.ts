@@ -3,6 +3,7 @@ import {UserModule} from './user/user.module';
 import {AuthModule} from './auth/auth.module';
 import {MongooseModule} from "@nestjs/mongoose";
 import {ConfigModule} from "@nestjs/config";
+import { ChatModule } from './chat/chat.module';
 
 @Module({
     imports: [
@@ -17,6 +18,7 @@ import {ConfigModule} from "@nestjs/config";
             }),
         UserModule,
         AuthModule,
+        ChatModule,
 
     ]
 })

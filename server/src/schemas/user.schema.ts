@@ -3,8 +3,8 @@ import {Prop, Schema, SchemaFactory} from "@nestjs/mongoose";
 
 @Schema()
 export class User {
-    @Prop({required: true, minLength: 3})
-    name: string;
+    @Prop({required: true, minLength: 3, unique: true})
+    nickName: string;
 
     @Prop({required: true, unique: true})
     email: string;
@@ -14,5 +14,7 @@ export class User {
 
     @Prop()
     status: string;
+
+    joinedChatRooms?: []
 }
 export const UserSchema = SchemaFactory.createForClass(User);

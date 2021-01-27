@@ -15,11 +15,11 @@ export class UserService {
     }
 
     async create(userDto: CreateUserDto) {
-        const {name, email, password} = userDto;
+        const {nickName, email, password} = userDto;
         const hashedPassword = await bcrypt.hash(password, 10)
 
         const createUser = await this.userModel.create({
-            name,
+            nickName,
             email,
             password: hashedPassword
         });
@@ -28,7 +28,7 @@ export class UserService {
     }
 
     async findUserByEmail(email){
-        return this.userModel.findOne({email})
+        return await this.userModel.findOne({email})
     }
 
 }
