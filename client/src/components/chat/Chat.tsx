@@ -1,56 +1,95 @@
 import React from 'react';
-import { IChatMessage, IChatState } from './types';
-import { ChatContext } from './ChatContext';
+import {IAuthor, IChatMessage, IChatState, IOpenChat} from './types';
+import {ChatContext} from './ChatContext';
 
-export class Chat extends React.Component {
+const _ = require('lodash');
+
+interface PropsType {
+    chatRoom: IOpenChat,
+    activeUser: IAuthor,
+    messageList: any[]
+}
+
+export class Chat<Props> extends React.Component<PropsType, {}> {
     static contextType = ChatContext;
+    author: IAuthor = {
+        _id: '',
+        email: '',
+        nickName: '',
+    };
+    chatRoom: IOpenChat = {
+        _id: '',
+        owner: {_id: '', nickName: ''},
+        connectedUsers: [{_id: '', nickName: ''}],
+        type: '',
+        name: ''
+    };
 
     state: IChatState = {
-        messages: [
-            {
-                message: 'Welcome!',
-                author: 'Bot'
-            }
-        ],
+        messages: [],
         input: ''
     }
 
-    componentDidMount () {
+    constructor(props: PropsType | Readonly<PropsType>) {
+        super(props)
+    }
+
+    shouldComponentUpdate(nextProps: Readonly<PropsType>, nextState: Readonly<{}>, nextContext: any): boolean {
+               console.log('nextProps', nextProps)
+              console.log('nextState', nextState)
+              console.log('oldState', this.state)
+              console.log('oldProps', this.props)
+        let isSameMessageList = !(_.isEqual(nextProps.messageList, this.props.messageList))
+        let isSameChatRoom = !(_.isEqual(nextProps.chatRoom, this.props.chatRoom))
+        let res = isSameChatRoom || isSameMessageList
+        console.log(res);
+        return res
+    }
+
+    async componentDidMount() {
+        const {chatRoom, activeUser, messageList} = this.props;
+        console.log('this.props', this.props)
+        this.author = activeUser;
+        this.chatRoom = chatRoom;
+        console.log('chatRoom: ', chatRoom._id)
+        this.state.messages = messageList;
 
         //initiate socket connection
         this.context.init();
+        this.context.enterChatRoom({
+            roomId: chatRoom._id,
+            nickName: activeUser.nickName
+        })
 
         const observable = this.context.onMessage();
 
         observable.subscribe((m: IChatMessage) => {
             let messages = this.state.messages;
-
-
-            messages.push(m);
-            this.setState({ messages: messages });
+            const authorName = this.chatRoom.connectedUsers.find(user => user._id === m.author);
+            let newMessage = {...m, author: (authorName?.nickName ?? 'author')};
+            messages.push(newMessage);
+            this.setState({messages: messages});
         });
     }
 
-    componentWillUnmount () {
+    componentWillUnmount() {
         this.context.disconnect();
     }
 
-    render () {
+    render() {
 
         const updateInput = (e: React.ChangeEvent<HTMLInputElement>): void => {
-            this.setState({ input: e.target.value });
+            this.setState({input: e.target.value});
         }
 
         const handleMessage = (): void => {
-
-            const author: string = 'Ross';
-
             if (this.state.input !== '') {
                 this.context.send({
-                    message: this.state.input,
-                    author: author
+                    text: this.state.input,
+                    author: this.author?._id,
+                    chatRoom: this.chatRoom?._id
                 });
-                this.setState({ input: '' });
+                this.setState({input: ''});
             }
         };
 
@@ -60,11 +99,12 @@ export class Chat extends React.Component {
                 <div className="App-chatbox">
                     {this.state.messages.map((msg: IChatMessage) => {
                         msgIndex++;
+
                         return (
                             <div key={msgIndex}>
                                 <p>{msg.author}</p>
                                 <p>
-                                    {msg.message}
+                                    {msg.text}
                                 </p>
                             </div>
                         );
@@ -77,7 +117,9 @@ export class Chat extends React.Component {
                     value={this.state.input}
                 />
                 <p>
-                    <button onClick={() => { handleMessage() }}>
+                    <button onClick={() => {
+                        handleMessage()
+                    }}>
                         Send Message
                     </button>
                 </p>

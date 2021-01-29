@@ -13,13 +13,24 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     @Get()
     getUserInfo(@Req() req) {
-        console.log(req)
         return this.userService.findUserByEmail(req.user.email)
     }
 
     @UseGuards(JwtAuthGuard)
     @Get('list')
-    getListUsers() {
+    getListUsers(@Req() req) {
         return this.userService.findUsersList();
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('listExId')
+    getListUsersExId(@Req() req) {
+        return this.userService.findUsersListExId(req.user._id);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('joinChatList')
+    getUserWithJoinChatList(@Req() req) {
+        return this.userService.findUserByEmail(req.user.email)
     }
 }

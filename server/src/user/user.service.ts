@@ -24,7 +24,6 @@ export class UserService {
             email,
             password: hashedPassword
         });
-        console.log(createUser)
         return createUser;
     }
 
@@ -33,14 +32,41 @@ export class UserService {
         return user;
     }
 
+    async findUserByIdWithJoinChatList(userId) {
+        let user = await this.userModel.findOne({_id: userId}, '_id nickName')
+            .populate({
+                    path: 'joinedChatRooms',
+                    populate: {path: 'owner connectedUsers', select: '_id nickName'},
+                },
+            );
+        return user;
+    }
+
     async findUsersList(condition?) {
         let usersList = condition ? await this.userModel.find(condition) : await this.userModel.find();
         return usersList;
     }
 
+    async findUsersListExId(userId: string) {
+        let list = await this.userModel.find({
+            _id: {$ne: userId}
+        })
+        return list
+    }
+
     async updateAvatar(avatar, userId) {
         const user = await this.userModel.findOne({_id: userId})
         user.avatar = normalize(avatar.path)
+        return await user.save()
+    }
+
+    async findUserByCondition(condition) {
+        return await this.userModel.findOne(condition);
+    }
+
+    async addJoinChat(userId, chatRoomId) {
+        const user = await this.userModel.findOne({_id: userId})
+        user.joinedChatRooms.push(chatRoomId);
         return await user.save()
     }
 

@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { SocketService } from './chatService';
+import { SocketService } from './socketService';
 
 export const ChatContext: React.Context<SocketService> = createContext(new SocketService());
 

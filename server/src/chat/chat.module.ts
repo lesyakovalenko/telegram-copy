@@ -6,6 +6,7 @@ import {MongooseModule} from "@nestjs/mongoose";
 import {UserSchema} from "../schemas/user.schema";
 import {MessageSchema} from "../schemas/message.schema";
 import {ChatRoomSchema} from "../schemas/chatRoom.schema";
+import {ChatService} from "./chat.service";
 
 @Module({
     imports: [
@@ -15,7 +16,7 @@ import {ChatRoomSchema} from "../schemas/chatRoom.schema";
             {name: 'ChatRoom', schema: ChatRoomSchema},
         ]),
         UserModule],
-    providers: [ChatGateway],
+    providers: [ChatGateway, ChatService],
     controllers: [ChatController]
 })
 export class ChatModule {}

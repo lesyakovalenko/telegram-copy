@@ -14,12 +14,12 @@ export class User {
     password: string;
 
     @Prop()
-    status: string;
-
-    @Prop()
     avatar?: string;
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ChatRoom' }] })
     joinedChatRooms?: ChatRoom[]
+
+    @Prop()
+    clientId?: string;
 }
 export const UserSchema = SchemaFactory.createForClass(User);

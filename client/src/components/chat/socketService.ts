@@ -26,7 +26,6 @@ export class SocketService {
         this.socket.emit('enter-chat-room', chatRoom)
     }
 
-
     // link message event to rxjs data source
     public onMessage(): Observable<IChatMessage> {
         return fromEvent(this.socket, 'message');
