@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import * as userActions from '../actions/user'
+import {Col, Container, Row} from "react-bootstrap";
 
 export const Profile = () => {
     const [person, setPerson] = useState( {
@@ -20,7 +21,13 @@ export const Profile = () => {
 
     return (
         <div>
-            Avatar
+            <Container>
+                <Row>
+                    <Col>
+                        {/*<Image src="holder.js/171x180" rounded />*/}
+                    </Col>
+                </Row>
+            </Container>
             <p>nickName: {person?.nickName}</p>
             <p>email: {person?.email}</p>
         </div>

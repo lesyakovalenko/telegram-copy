@@ -1,5 +1,5 @@
 import React from 'react';
-import {IAuthor, IChatMessage, IChatState, IOpenChat} from './types';
+import {IAuthor, IChatMessage, IChatState, IChatTyping, IOpenChat} from './types';
 import {ChatContext} from './ChatContext';
 
 const _ = require('lodash');
@@ -27,7 +27,8 @@ export class Chat<Props> extends React.Component<PropsType, {}> {
 
     state: IChatState = {
         messages: [],
-        input: ''
+        input: '',
+        isTyping: false
     }
 
     constructor(props: PropsType | Readonly<PropsType>) {
@@ -36,14 +37,26 @@ export class Chat<Props> extends React.Component<PropsType, {}> {
 
     shouldComponentUpdate(nextProps: Readonly<PropsType>, nextState: Readonly<{}>, nextContext: any): boolean {
                console.log('nextProps', nextProps)
-              console.log('nextState', nextState)
-              console.log('oldState', this.state)
-              console.log('oldProps', this.props)
+        console.log('nextState', nextState)
+        console.log('oldState', this.state)
+        console.log('oldProps', this.props)
         let isSameMessageList = !(_.isEqual(nextProps.messageList, this.props.messageList))
         let isSameChatRoom = !(_.isEqual(nextProps.chatRoom, this.props.chatRoom))
-        let res = isSameChatRoom || isSameMessageList
+        let isChangeRoom = !(_.isEqual(nextProps.chatRoom._id, this.props.chatRoom._id))
+        let res = isSameChatRoom || isSameMessageList || isChangeRoom || !(nextProps.messageList.length == this.props.messageList.length)
         console.log(res);
-        return res
+        return true
+    }
+
+    componentDidUpdate(prevProps: Readonly<PropsType>, prevState: Readonly<{}>, snapshot?: any) {
+       console.log(prevProps)
+        console.log('componentDidUpdate',this.props)
+        const {chatRoom, activeUser, messageList} = this.props;
+        console.log('this.props', this.props)
+        this.author = activeUser;
+        this.chatRoom = chatRoom;
+        console.log('chatRoom: ', chatRoom._id)
+        this.state.messages = messageList;
     }
 
     async componentDidMount() {
@@ -53,14 +66,19 @@ export class Chat<Props> extends React.Component<PropsType, {}> {
         this.chatRoom = chatRoom;
         console.log('chatRoom: ', chatRoom._id)
         this.state.messages = messageList;
-
+        console.log('chatRoom: ', this.state.messages )
         //initiate socket connection
         this.context.init();
         this.context.enterChatRoom({
             roomId: chatRoom._id,
             nickName: activeUser.nickName
         })
+        const observableT = this.context.onTyping();
 
+        observableT.subscribe((t: IChatTyping) => {
+            console.log('on typing', t)
+            this.setState({isTyping: t.typing});
+        });
         const observable = this.context.onMessage();
 
         observable.subscribe((m: IChatMessage) => {
@@ -77,8 +95,18 @@ export class Chat<Props> extends React.Component<PropsType, {}> {
     }
 
     render() {
-
+        const handleTyping = ()=>{
+            console.log('typing')
+                this.context.typing({
+                    typing: true,
+                    author: this.author?._id,
+                    chatRoom: this.chatRoom?._id
+                });
+               // this.setState({input: ''});
+        }
         const updateInput = (e: React.ChangeEvent<HTMLInputElement>): void => {
+            console.log('typing', e)
+            handleTyping()
             this.setState({input: e.target.value});
         }
 
@@ -92,6 +120,8 @@ export class Chat<Props> extends React.Component<PropsType, {}> {
                 this.setState({input: ''});
             }
         };
+
+
 
         let msgIndex = 0;
         return (

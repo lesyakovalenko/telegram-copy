@@ -9,7 +9,6 @@ import {EChatType} from "./enums/chatType.enum";
 import {User} from "../user/interfaces/user.interface";
 import {UserService} from "../user/user.service";
 
-
 @Injectable()
 export class ChatService {
     private messageModel: Model<Message>;
@@ -37,12 +36,11 @@ export class ChatService {
     }
 
     async getAllMessages(chatRoomId) {
-        let listMes = await this.messageModel
+        let listMsg = await this.messageModel
             .find({chatRoom: chatRoomId})
             .populate({path:'author', select: '_id nickName'})
             .sort({createdAt: 'asc'});
-        console.log('list message', listMes)
-        return listMes;
+        return listMsg;
     }
 
     async getChatListByUser(userId: string) {
@@ -71,6 +69,20 @@ export class ChatService {
         })
         await this.userService.addJoinChat(ownerId, createChat._id)
         await this.userService.addJoinChat(connectedUserId, createChat._id)
+        return createChat;
+    }
+
+    async createNewChatRoom(newChatRoom: CreateChatRoomDto){
+       newChatRoom.connectedUsers.push(newChatRoom.owner);
+
+        const createChat = await this.chatRoomModel.create({
+            ...newChatRoom,
+        })
+
+
+        newChatRoom.connectedUsers.forEach((item)=> {    //TODO
+             this.userService.addJoinChat(item, createChat._id);
+        })
         return createChat;
     }
 }

@@ -67,7 +67,16 @@ export class UserService {
     async addJoinChat(userId, chatRoomId) {
         const user = await this.userModel.findOne({_id: userId})
         user.joinedChatRooms.push(chatRoomId);
-        return await user.save()
+        return user.save()
     }
 
+    // async addJoinChatManyUsers(users, chatRoomId: string){
+    //     let filter = users.map((item)=> {
+    //         return {_id: item}
+    //     })
+    //     this.userModel.updateMany({$or: filter},
+    //         {
+    //             $push: {joinedChatRooms: chatRoomId}
+    //         })
+    // }
 }

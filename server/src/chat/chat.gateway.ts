@@ -14,6 +14,7 @@ import {Socket} from "socket.io";
 import {UserService} from "../user/user.service";
 import {ChatService} from "./chat.service";
 import {NewMessageDto} from "./dto/new.message.dto";
+import {TypingDto} from "./dto/typing.dto";
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -36,15 +37,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.chatRoomModel = chatRoomModel
     }
 
-    async handleConnection() {
+    async handleConnection(client: Socket) {
         this.users++;
+        console.log(`Client connected: ${client.id}`);
         this.server.emit('users', this.users)
-    }
-
-
-    @SubscribeMessage('chat')
-    async onChat(client, message) {
-        client.broadcast.emit('chat', message);
     }
 
     async handleDisconnect(client: Socket) {
@@ -58,8 +54,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     @SubscribeMessage('enter-chat-room')
     async enterChatRoom(client: Socket, data: { nickname: string, roomId: string }) {
-        let user = await this.userService.findUserByCondition({nickName: data.nickname});
 
+        let user = await this.userService.findUserByCondition({nickName: data.nickname});
+         user.clientId = client.id;
+         user.save();
         client.join(data.roomId).broadcast.to(data.roomId)
             .emit('users-changed', {user: user, event: 'joined'});
     }
@@ -76,5 +74,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log(message)
         const newMessage = await this.chatService.saveMassage(message)
         client.server.in(message.chatRoom as string).emit('message', newMessage);
+    }
+
+    @SubscribeMessage('add-typing')
+    async addTyping(client: Socket, typing: TypingDto) {
+        client.server.in(typing.chatRoom as string).emit('typing', typing);
     }
 }

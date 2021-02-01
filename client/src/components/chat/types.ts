@@ -3,10 +3,16 @@ export interface IChatMessage {
     text: string;
     chatRoom: string
 }
+export interface IChatTyping {
+    author: string;
+    typing: boolean;
+    chatRoom: string
+}
 
 export interface IChatState {
     input: string;
     messages: IChatMessage[];
+    isTyping: boolean;
 }
 
 export  interface IChatRoom {

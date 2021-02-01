@@ -1,7 +1,9 @@
-import {Controller, Get, Req, UseGuards} from '@nestjs/common';
+import {Controller, Get, Post, Req, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
 import {UserService} from "./user.service";
 import JwtAuthGuard from "../auth/JwtAuthGuard";
 import {ApiTags} from "@nestjs/swagger";
+import {User} from "../user.decorator";
+import {FileInterceptor} from "@nestjs/platform-express";
 
 @ApiTags('Users')
 @Controller('user')
@@ -12,8 +14,8 @@ export class UserController {
 
     @UseGuards(JwtAuthGuard)
     @Get()
-    getUserInfo(@Req() req) {
-        return this.userService.findUserByEmail(req.user.email)
+    getUserInfo(@User() user) {
+        return this.userService.findUserByEmail(user.email)
     }
 
     @UseGuards(JwtAuthGuard)
@@ -24,13 +26,21 @@ export class UserController {
 
     @UseGuards(JwtAuthGuard)
     @Get('listExId')
-    getListUsersExId(@Req() req) {
-        return this.userService.findUsersListExId(req.user._id);
+    getListUsersExId(@User() user) {
+        return this.userService.findUsersListExId(user._id);
     }
 
     @UseGuards(JwtAuthGuard)
     @Get('joinChatList')
-    getUserWithJoinChatList(@Req() req) {
-        return this.userService.findUserByEmail(req.user.email)
+    getUserWithJoinChatList(@User() user) {
+        return this.userService.findUserByEmail(user.email)
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @UseInterceptors(FileInterceptor('file'))
+    @Post('uploadAvatar')
+    uploadAvatar(@User() user, @UploadedFile() file){
+        console.log('avatar', file)
+        return this.userService.updateAvatar(file, user._id)
     }
 }
