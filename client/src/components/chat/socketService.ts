@@ -1,18 +1,15 @@
 import io from 'socket.io-client';
 import {IChatMessage, IChatRoom, IChatTyping} from './types';
-import {from, fromEvent, Observable} from 'rxjs';
+import {fromEvent, Observable} from 'rxjs';
+import {token} from '../../utils/api';
 
 export class SocketService {
     private socket: SocketIOClient.Socket = {} as SocketIOClient.Socket;
 
     public init(): SocketService {
         console.log('initiating socket service');
-        let token = localStorage.getItem('token');
-        this.socket = io('localhost:5000')
+        this.socket = io('localhost:5000', {query: {token: token}})
         return this;
-    }
-    public connect(): void {
-        this.socket.disconnect();
     }
 
     // send a message for the server to broadcast
@@ -48,5 +45,8 @@ export class SocketService {
     // disconnect - used when unmounting
     public disconnect(): void {
         this.socket.disconnect();
+    }
+    public connect(): void {
+        this.socket.connect();
     }
 }

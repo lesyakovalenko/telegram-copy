@@ -1,6 +1,5 @@
 export enum EChatType {
-    chat='chat',
-    group='group',
-    channel='channel'
-
+  chat = 'chat',
+  group = 'group',
+  channel = 'channel',
 }

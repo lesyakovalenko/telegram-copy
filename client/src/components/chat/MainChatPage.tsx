@@ -72,18 +72,17 @@ export const MainChatPage = () => {
         setListMessages(list)
 
     }
-
     useEffect(() => {
         load()
     }, [])
-    useEffect(() => {
-        if (activeChat) {
-            loadListMessages();
-        }
-    }, [showChat, activeChat]);
 
-    let listItems, listChat;
-    let item;
+    useEffect(()=>{
+        loadListMessages();
+        console.log('listMessages', listMessages)
+        console.log('activeChat', listMessages)
+    }, [activeChat])
+
+
     const clickPerson = async (user: IUser) => {
         setActiveChat(null)
         setShowChat(false)
@@ -109,6 +108,8 @@ export const MainChatPage = () => {
 
     const clickChat = (chat: IOpenChat) => {
         console.log(chat)
+        setActiveChat(null)
+        setShowChat(false)
         setActiveChat(chat);
         setShowChat(true)
 
@@ -126,12 +127,14 @@ export const MainChatPage = () => {
             return item.hasOwnProperty('name') ? item : setChatName(item)
         })
         setChats(newListChats);
+        setActiveChat(null);
+        setShowChat(false)
         console.log('getListChat', listChats);
     }
 
     const changeTab = (eventKey: string | null) => {
         console.log('change tab e', eventKey)
-        if (eventKey == "chats") {
+        if (eventKey === "chats") {
             getListChat()
         }
     }
@@ -140,7 +143,7 @@ export const MainChatPage = () => {
         let newChat = {...chat}
         if (!chat.hasOwnProperty('name')) {
             let connectedUsers = chat.connectedUsers;
-            let userX = connectedUsers?.find(user => user.nickName != author.nickName)
+            let userX = connectedUsers?.find(user => user.nickName !== author.nickName)
             newChat.name = (userX?.nickName ?? 'author');
         }
         return newChat;
@@ -150,15 +153,14 @@ export const MainChatPage = () => {
 
     const addPersonToChatGroup = (user: IUser) => {
         disabled = true;
-        console.log(user);
         listUsersForChat.push(user._id);
         setListUsersForChat(listUsersForChat)
     }
 
-    const createNewChatRoom = async() => {
+    const createNewChatRoom = async () => {
         handleClose()
         console.log(listUsersForChat)
-        const newChat =  await chatAction.createNewChatRoom({
+        const newChat = await chatAction.createNewChatRoom({
             type: typeChat,
             connectedUsers: listUsersForChat,
             name: nameNewChat
@@ -177,7 +179,7 @@ export const MainChatPage = () => {
         setTypeChat('group');
     }
 
-    const handleChangeName = (event: any)=> {
+    const handleChangeName = (event: any) => {
         console.log('event', event.target.value)
         setNameNewChat(event.target.value);
         console.log(nameNewChat)
@@ -200,13 +202,13 @@ export const MainChatPage = () => {
                                 </InputGroup.Prepend>
                                 <FormControl
                                     value={nameNewChat}
-                                onChange={handleChangeName}
+                                    onChange={handleChangeName}
                                     aria-label="Default"
                                     aria-describedby="inputGroup-sizing-default"
                                 />
                             </InputGroup>
                             <ListGroup>
-                                {listItems = usersList.map((el: any) => (
+                                {usersList.map((el: any) => (
                                     <ListGroup.Item active={active} disabled={disabled} action variant="dark"
                                                     onClick={() => (addPersonToChatGroup(el))}>{el?.nickName}</ListGroup.Item>
                                 ))}
@@ -218,7 +220,7 @@ export const MainChatPage = () => {
                             <Button variant="secondary" onClick={handleClose}>
                                 Close
                             </Button>
-                            <Button variant="primary" onClick={createNewChatRoom }>
+                            <Button variant="primary" onClick={createNewChatRoom}>
                                 Create {typeChat}
                             </Button>
                         </Modal.Footer>
@@ -230,11 +232,11 @@ export const MainChatPage = () => {
                     }}>
                         <Tab eventKey={"people"} title={"People"}>
                             <ListGroup>
-                                {listItems = usersList.map((el: any) => (
-
-
+                                {usersList.map((el: any) => (
                                     <ListGroup.Item action variant="dark"
-                                                    onClick={() => (clickPerson(el))}>{el?.nickName}</ListGroup.Item>
+                                                    onClick={() => (clickPerson(el))}>
+                                        {el?.nickName}
+                                    </ListGroup.Item>
                                 ))}
                                 {/*//TODO: added scroll*/}
 
@@ -242,7 +244,7 @@ export const MainChatPage = () => {
                         </Tab>
                         <Tab eventKey={"chats"} title={"Chats"}>
                             <ListGroup>
-                                {listChat = chats.map((el: any) => (
+                                {chats.map((el: any) => (
                                     <ListGroup.Item action variant="dark"
                                                     onClick={() => (clickChat(el))}>{el?.name}</ListGroup.Item>
                                 ))}
@@ -252,7 +254,7 @@ export const MainChatPage = () => {
                     </Tabs>
                 </Col>
                 <Col>
-                    {item = (showChat && activeChat && listMessages) ?
+                    {(showChat && activeChat && listMessages) ?
                         <div>
                             <ChatContext.Provider value={socketService}>
                                 <Chat chatRoom={activeChat} activeUser={author} messageList={listMessages}></Chat>

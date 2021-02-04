@@ -1,6 +1,7 @@
 import React from 'react';
 import {IAuthor, IChatMessage, IChatState, IChatTyping, IOpenChat} from './types';
 import {ChatContext} from './ChatContext';
+import * as chatAction from "../../actions/chat";
 
 const _ = require('lodash');
 
@@ -10,69 +11,82 @@ interface PropsType {
     messageList: any[]
 }
 
-export class Chat<Props> extends React.Component<PropsType, {}> {
+export class Chat extends React.Component<PropsType, {}> {
     static contextType = ChatContext;
-    author: IAuthor = {
-        _id: '',
-        email: '',
-        nickName: '',
-    };
-    chatRoom: IOpenChat = {
-        _id: '',
-        owner: {_id: '', nickName: ''},
-        connectedUsers: [{_id: '', nickName: ''}],
-        type: '',
-        name: ''
-    };
-
     state: IChatState = {
         messages: [],
         input: '',
-        isTyping: false
+        isTyping: false,
+        author: {
+            _id: '',
+            email: '',
+            nickName: '',
+        },
+        chatRoom: {
+            _id: '',
+            owner: {_id: '', nickName: ''},
+            connectedUsers: [{_id: '', nickName: ''}],
+            type: '',
+            name: ''
+        }
+
     }
 
     constructor(props: PropsType | Readonly<PropsType>) {
         super(props)
+        const {chatRoom, activeUser, messageList} = props;
+        this.setState({
+            messages: messageList,
+            author: activeUser,
+            chatRoom: chatRoom
+        });
+        this.updateMessageList = this.updateMessageList.bind(this)
+
+    }
+
+    updateMessageList(entry: ConcatArray<IChatMessage>) {
+        this.setState({messages: this.state.messages.concat(entry)})
+    }
+
+    async loadListMessages(chatRoomId: string) {
+        let list: any[];
+        list = [];
+        let messageList = await chatAction.getMessagesList(chatRoomId)
+        console.log('messageList')
+        if (messageList.length) {
+            messageList.forEach((message: any) => {
+                list.push({
+                    author: message.author.nickName,
+                    text: message.text,
+                    chatRoom: message.chatRoom
+                })
+            })
+        }
+        console.log(list.length)
+        this.setState({messages: list})
     }
 
     shouldComponentUpdate(nextProps: Readonly<PropsType>, nextState: Readonly<{}>, nextContext: any): boolean {
-               console.log('nextProps', nextProps)
-        console.log('nextState', nextState)
-        console.log('oldState', this.state)
-        console.log('oldProps', this.props)
         let isSameMessageList = !(_.isEqual(nextProps.messageList, this.props.messageList))
         let isSameChatRoom = !(_.isEqual(nextProps.chatRoom, this.props.chatRoom))
         let isChangeRoom = !(_.isEqual(nextProps.chatRoom._id, this.props.chatRoom._id))
-        let res = isSameChatRoom || isSameMessageList || isChangeRoom || !(nextProps.messageList.length == this.props.messageList.length)
+        let res = isSameChatRoom || isSameMessageList || isChangeRoom || !(nextProps.messageList.length === this.props.messageList.length)
         console.log(res);
+        console.log('Check state',this.state.messages, nextState)
         return true
-    }
-
-    componentDidUpdate(prevProps: Readonly<PropsType>, prevState: Readonly<{}>, snapshot?: any) {
-       console.log(prevProps)
-        console.log('componentDidUpdate',this.props)
-        const {chatRoom, activeUser, messageList} = this.props;
-        console.log('this.props', this.props)
-        this.author = activeUser;
-        this.chatRoom = chatRoom;
-        console.log('chatRoom: ', chatRoom._id)
-        this.state.messages = messageList;
     }
 
     async componentDidMount() {
         const {chatRoom, activeUser, messageList} = this.props;
-        console.log('this.props', this.props)
-        this.author = activeUser;
-        this.chatRoom = chatRoom;
-        console.log('chatRoom: ', chatRoom._id)
-        this.state.messages = messageList;
-        console.log('chatRoom: ', this.state.messages )
+        this.setState({
+            messages: messageList,
+            author: activeUser,
+            chatRoom: chatRoom
+        });
+        await this.loadListMessages(chatRoom._id)
+        console.log('chatRoom: ', this.state.messages)
         //initiate socket connection
         this.context.init();
-        this.context.enterChatRoom({
-            roomId: chatRoom._id,
-            nickName: activeUser.nickName
-        })
         const observableT = this.context.onTyping();
 
         observableT.subscribe((t: IChatTyping) => {
@@ -83,7 +97,7 @@ export class Chat<Props> extends React.Component<PropsType, {}> {
 
         observable.subscribe((m: IChatMessage) => {
             let messages = this.state.messages;
-            const authorName = this.chatRoom.connectedUsers.find(user => user._id === m.author);
+            const authorName = this.state.chatRoom.connectedUsers?.find(user => user._id === m.author);
             let newMessage = {...m, author: (authorName?.nickName ?? 'author')};
             messages.push(newMessage);
             this.setState({messages: messages});
@@ -95,14 +109,14 @@ export class Chat<Props> extends React.Component<PropsType, {}> {
     }
 
     render() {
-        const handleTyping = ()=>{
+        const handleTyping = () => {
             console.log('typing')
-                this.context.typing({
-                    typing: true,
-                    author: this.author?._id,
-                    chatRoom: this.chatRoom?._id
-                });
-               // this.setState({input: ''});
+            this.context.typing({
+                typing: true,
+                author: this.state.author?._id,
+                chatRoom: this.state.chatRoom?._id
+            });
+            // this.setState({input: ''});
         }
         const updateInput = (e: React.ChangeEvent<HTMLInputElement>): void => {
             console.log('typing', e)
@@ -114,13 +128,12 @@ export class Chat<Props> extends React.Component<PropsType, {}> {
             if (this.state.input !== '') {
                 this.context.send({
                     text: this.state.input,
-                    author: this.author?._id,
-                    chatRoom: this.chatRoom?._id
+                    author: this.state.author?._id,
+                    chatRoom: this.state.chatRoom?._id
                 });
                 this.setState({input: ''});
             }
         };
-
 
 
         let msgIndex = 0;

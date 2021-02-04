@@ -13,6 +13,8 @@ export interface IChatState {
     input: string;
     messages: IChatMessage[];
     isTyping: boolean;
+    author: IAuthor;
+    chatRoom: IChat;
 }
 
 export  interface IChatRoom {

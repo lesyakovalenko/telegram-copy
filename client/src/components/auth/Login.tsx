@@ -11,7 +11,7 @@ import {inputForm} from "./inputForm";
 import {useHistory} from "react-router-dom";
 import * as authActions from '../../actions/auth'
 import {formStatusProps} from "./status.error";
-
+import {Nav} from "react-bootstrap";
 
 
 export const Login: React.FunctionComponent = () => {
@@ -29,6 +29,7 @@ export const Login: React.FunctionComponent = () => {
                 await authActions.login(data)
                 history.push('/profile')
             } catch (e) {
+                setDisplayFormStatus(true)
                 setFormStatus(formStatusProps.error)
                 resetForm({})
             }
@@ -106,6 +107,11 @@ export const Login: React.FunctionComponent = () => {
                                             ) : null}
                                         </div>
                                     )}
+                                </Grid>
+                                <Grid item lg={10} md={10} sm={10} xs={10}>
+                                    <Nav>
+                                        <Nav.Link href="/register">Register</Nav.Link>
+                                    </Nav>
                                 </Grid>
                             </Grid>
                         </Form>

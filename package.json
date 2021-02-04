@@ -1,0 +1,14 @@
+{
+  "name": "root",
+  "private": true,
+  "scripts": {
+    "postinstall": "lerna bootstrap",
+    "bootstrap": "lerna bootstrap",
+    "start:client": "lerna run start --scope=client --stream",
+    "start:server": "lerna run start:dev --scope=server --stream",
+    "start": "lerna run start --stream --parallel"
+  },
+  "devDependencies": {
+    "lerna": "^3.22.0"
+  }
+}

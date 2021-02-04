@@ -12,6 +12,7 @@ import {inputForm} from "./inputForm";
 import {useHistory} from "react-router-dom";
 import * as authActions from '../../actions/auth';
 import {formStatusProps} from "./status.error";
+import {Nav} from "react-bootstrap";
 
 export const Register: React.FunctionComponent = () => {
     const classes = useStyles()
@@ -20,50 +21,21 @@ export const Register: React.FunctionComponent = () => {
         message: '',
         type: '',
     })
-    const [person, setPerson] = useState<IUser>({
-        _id: '',
-        email: '',
-        password: '',
-        nickName: ''
-    })
-    const history = useHistory();
-    // useEffect(()=>{
-    //     console.log('useEffect',person)
-    //     if(person?._id && person?.email){
-    //         history.push('/login')
-    //     }
-    //
-    // }, [])
 
+    const history = useHistory();
 
     const createNewUser = async (data: IRegister, resetForm: Function) => {
         if (data) {
             try {
-                const newUser = await authActions.register(data);
+                await authActions.register(data);
                 setDisplayFormStatus(true)
                 history.push('/login')
             } catch (e) {
                 setFormStatus(formStatusProps.error)
                 setDisplayFormStatus(true)
             }
-
-            // axios.post(API_SERVER, data)
-            //     .then(res => {
-            //         setPerson(res.data._doc);
-            //         console.log('register', res)
-            //
-            //
-            //          //setDisplayFormStatus(true)
-            //     }).catch((e) => {
-            //     console.log(e)
-            //     setDisplayFormStatus(true)
-            //
-            // })
-            // console.log(data)
-            //resetForm({})
         }
     }
-
 
     return (
         <div className={classes.root}>
@@ -75,9 +47,8 @@ export const Register: React.FunctionComponent = () => {
                     email: '',
                 }}
                 onSubmit={(values: IRegister, actions) => {
-                    createNewUser(values, actions.resetForm);
+                    createNewUser(values, actions.resetForm).then(r => console.log(`User register ${r}`));
                     setTimeout(() => {
-                        console.log(person)
                         history.push('/login')
                     }, 0)
                 }}
@@ -182,6 +153,11 @@ export const Register: React.FunctionComponent = () => {
                                             ) : null}
                                         </div>
                                     )}
+                                </Grid>
+                                <Grid item lg={10} md={10} sm={10} xs={10}>
+                                    <Nav>
+                                        <Nav.Link href="/login">Login</Nav.Link>
+                                    </Nav>
                                 </Grid>
                             </Grid>
                         </Form>

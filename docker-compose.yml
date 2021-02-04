@@ -1,0 +1,16 @@
+version: '3'
+services:
+  database:
+    image: 'mongo:latest'
+    container_name: 'telegram-copy-db-container'
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_ROOT_DATABASE: ${DB_NAME}
+    volumes:
+      - ./mongo-volume:/data/db
+    ports:
+      - '27017:27017'
+    restart: unless-stopped
+
+

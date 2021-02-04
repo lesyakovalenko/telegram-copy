@@ -1,23 +1,22 @@
-import {IsEmail, IsNotEmpty, IsString, Matches} from 'class-validator';
-import {ApiProperty} from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
-    @ApiProperty()
-    @IsEmail()
-    readonly email: string;
+  @ApiProperty()
+  @IsEmail()
+  readonly email: string;
 
-    @ApiProperty()
-    @IsString()
-    @IsNotEmpty()
-    readonly nickName: string;
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  readonly nickName: string;
 
-
-    @IsString()
-    @IsNotEmpty()
-    @Matches(
-        /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})/,
-        {message: 'Weak password'},
-    )
-    @ApiProperty()
-    readonly password: string;
+  @IsString()
+  @IsNotEmpty()
+  @Matches(
+    /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})/,
+    { message: 'Weak password' },
+  )
+  @ApiProperty()
+  readonly password: string;
 }
