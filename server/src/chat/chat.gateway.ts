@@ -108,13 +108,4 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async addTyping(client: Socket, typing: TypingDto) {
     client.server.in(typing.chatRoom as string).emit('typing', typing);
   }
-
-  // @UseGuards(WsJwtGuard)
-  // @SubscribeMessage('prev-list-messages')
-  // async getListMessage(client: Socket, chatRoom: string) {
-  //   const listMessages = await this.chatService.getAllMessages(chatRoom);
-  //   console.log(listMessages);
-  //   console.log(client.server.in(chatRoom as string));
-  //   client.server.in(chatRoom as string).emit('list-messages', listMessages);
-  // }
 }
